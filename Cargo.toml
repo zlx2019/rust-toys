@@ -1,0 +1,24 @@
+[package]
+name = "toys"
+version = "0.0.1"
+author = "zero9501"
+edition = "2021"
+description = "It's like using a library of tools like a toy"
+license = "Apache"
+
+[features]
+# 默认开启 strings-feature
+default = ["strings"]
+strings = []
+
+# 依赖
+[dependencies]
+
+# 开发环境配置
+[profile.dev]
+# 编译器对代码的优化级别0-3
+opt-level = 0
+
+# 生产环境配置
+[profile.release]
+opt-level = 3
