@@ -6,6 +6,11 @@
 // 将string.rs文件所有资源作为一个mod,并且导出
 #[cfg(feature = "strings")]
 pub mod strings;
+#[cfg(feature = "http")]
+pub mod http;
+pub mod data;
+
+
 
 // 单元测试
 #[cfg(test)]
@@ -17,4 +22,6 @@ mod tests {
         assert_eq!(is_blank("".to_string()),true);
         assert_eq!(is_blank(" ".to_string()),false);
     }
+
+
 }
