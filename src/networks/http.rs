@@ -1,7 +1,6 @@
 //! # HTTP请求函数模块
 
 use std::collections::HashMap;
-use std::io::ErrorKind;
 use std::time::Duration;
 use lazy_static::lazy_static;
 use serde::{Deserialize, Serialize};
@@ -99,6 +98,7 @@ pub struct ResponseBody{
 #[cfg(test)]
 mod tests{
     use std::collections::HashMap;
+    use std::io::ErrorKind;
     use crate::networks::http::*;
 
     /// 单元测试,同步Get请求

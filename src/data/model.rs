@@ -16,6 +16,8 @@ pub(crate) struct User{
     pub age: u8,
     pub gender: Gender
 }
+
+#[allow(dead_code)]// 避免函数未使用发生警告
 // User方法块
 impl User {
     // 构造方法
