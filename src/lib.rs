@@ -6,15 +6,15 @@
 // 将string.rs文件所有资源作为一个mod,并且导出
 #[cfg(feature = "strings")]
 pub mod strings;
-#[cfg(feature = "http")]
-pub mod http;
 pub mod data;
-
+pub mod networks;
 
 
 // 单元测试
 #[cfg(test)]
 mod tests {
+    use std::any::Any;
+    use std::collections::HashMap;
     use super::strings::*;
 
     #[test]
@@ -23,5 +23,13 @@ mod tests {
         assert_eq!(is_blank(" ".to_string()),false);
     }
 
+    #[test]
+    fn test_map(){
+        let mut map: HashMap<&str,Box<dyn Any>> = HashMap::new();
+        map.insert("name",Box::new("张三".to_string()));
+        map.insert("age",Box::new(18));
+        let name = map.get("name").unwrap().downcast_ref::<String>().unwrap();
+        println!("{:?}",name)
+    }
 
 }
