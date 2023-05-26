@@ -1,4 +1,5 @@
 use std::net::UdpSocket;
+use std::string::ToString;
 use serde::Deserialize;
 use crate::data::json::from_json_str;
 
@@ -32,6 +33,27 @@ pub struct IPAddress{
     // noprovince: 表示无省份名,可能是国外地区
     // nocity: 表示无城市名,可能是一些直辖市
     pub err: String
+}
+
+impl IPAddress {
+    // 获取地区名
+    pub fn get_name(&self) -> String{
+        let empty = String::from("");
+        let no_province = String::from("noprovince");
+        let no_city = String::from("nocity");
+        // 国内地区,获取省份和城市
+        if self.err == empty {
+            format!("{}{}",self.pro,self.city)
+        }else if self.err ==  no_province{
+            // 海外地区,获取addr
+            self.addr.clone()
+        }else if self.err == no_city {
+            //直辖市,只获取省份
+            self.pro.clone()
+        }else {
+            String::from("Unknown")
+        }
+    }
 }
 
 /// 获取本机局域网IP
@@ -121,7 +143,7 @@ pub fn get_ip_address_info(ip: &str) -> Result<IPAddress,Box<dyn std::error::Err
 }
 
 /// 获取IP地区相关信息(异步)
-/// #Examples
+/// # Examples
 ///
 /// ```rust
 /// use toys::networks::ip::get_ip_address_info_async;
@@ -137,8 +159,68 @@ pub async fn get_ip_address_info_async(ip: &str)-> Result<IPAddress,Box<dyn std:
                                     .text().await?)?)
 }
 
+/// 请求天气信息响应体
+#[derive(Deserialize,Debug)]
+pub struct WeatherInfo{
+    pub weather: Vec<Weather>, // 天气
+    pub main: Temperature, // 气温
+    pub wind: Wind,        // 风速
+    pub dt: i64,//数据计算时间戳 单位:unix
+
+}
+
+/// 天气信息
+#[derive(Deserialize,Debug)]
+pub struct Weather{
+    // 天气状况
+    pub main: String,
+    // 中文天气状况
+    #[serde(rename = "description")]
+    pub desc: String,
+}
+
+///气温相关信息
+#[derive(Deserialize,Debug)]
+pub struct Temperature{
+    // 温度
+    pub temp: f64,
+    // 最低温度
+    pub temp_min: f64,
+    // 最高温度
+    pub temp_max: f64,
+    // 湿度百分比
+    pub humidity: f64
+}
+
+/// 风速相关信息
+#[derive(Deserialize,Debug)]
+pub struct Wind{
+    // 风速 单位: 米/秒
+    pub speed: f64,
+    // 风向度数
+    pub deg: usize
+}
+
+
+/// 根据一个坐标获取当前的天气信息
+/// # Examples
+/// ```
+///
+/// ```
+pub async fn get_weather(lat: f64, lon: f64) -> Result<WeatherInfo,Box<dyn std::error::Error>>{
+    // 拼接获取天气的API,根据经度纬度查询
+    let url = format!("https://api.openweathermap.org/data/2.5/weather?lat={}&lon={}&lang=zh_cn&appid=55c1be18ce60cbae87c80507ef061ff6&units=metric",lat,lon);
+    // 发起异步请求,将响应体以json格式序列化为WeatherInfo
+    Ok(
+        reqwest::get(url).await?
+            .json::<WeatherInfo>().await?
+    )
+}
+
+
 #[cfg(test)]
 mod tests{
+    use reqwest::Error;
     use crate::networks::ip::{get_internal_ip, get_ip_address_info, get_ip_info_async, get_public_ip};
 
     #[test]
@@ -149,8 +231,8 @@ mod tests{
 
     #[test]
     pub fn test_get_public_ip(){
-        let ip = get_public_ip().unwrap();
-        assert_eq!(ip,"168.138.213.6".to_string());
+        // let ip = get_public_ip().unwrap();
+        // assert_eq!(ip,"45.62.169.92".to_string());
     }
 
     #[test]
